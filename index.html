@@ -21,8 +21,8 @@ asciidoc.install(2);
 <h1>django-jinja documentation</h1>
 <span id="author">Andrey Antukh,</span><br>
 <span id="email" class="monospaced">&lt;<a href="mailto:niwi@niwi.be">niwi@niwi.be</a>&gt;</span><br>
-<span id="revnumber">version 1.0.0,</span>
-<span id="revdate">2014-05-24</span>
+<span id="revnumber">version 1.0.4,</span>
+<span id="revdate">2014-08-24</span>
 <div id="toc">
   <div id="toctitle">Table of Contents</div>
   <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
@@ -47,23 +47,6 @@ Unlike Djinja, <strong>django-jinja</strong> is not intended to replace a Django
 <p>
 Unlike Coffin, the django-jinja codebase is much smaller and more modern. This way is much more
   maintainable and easily understandable how the library works.
-</p>
-</li>
-</ul></div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_supported_versions">Supported versions</h2>
-<div class="sectionbody">
-<div class="ulist"><ul>
-<li>
-<p>
-Latest stable version: <strong>1.0.0</strong>
-</p>
-</li>
-<li>
-<p>
-Previous stable version: <strong>0.25.0</strong>
 </p>
 </li>
 </ul></div>
@@ -199,9 +182,10 @@ engine and templates that not matches the <span class="monospaced">.jinja</span>
 <span class="c"># Mute reverse url exceptions (default: False)</span>
 <span class="n">JINJA2_MUTE_URLRESOLVE_EXCEPTIONS</span> <span class="o">=</span> <span class="bp">True</span>
 
-<span class="c"># Replace small subset of jinja2 filters with</span>
-<span class="c"># django filters (default: True)</span>
-<span class="n">JINJA2_FILTERS_REPLACE_FROM_DJANGO</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="c"># Keep original small subset of jinja filters</span>
+<span class="c"># instead of use the django&#39;s versions of them.</span>
+<span class="c"># Default: True</span>
+<span class="n">JINJA2_FILTERS_REPLACE_FROM_DJANGO</span> <span class="o">=</span> <span class="bp">False</span>
 </pre></div></div></div>
 </div>
 <div class="sect2">
@@ -253,15 +237,36 @@ for makes use of Django&#8217;s built-in cache framework.</p></div>
     <span class="k">return</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 </pre></div></div></div>
 <div class="listingblock">
+<div class="title">Register constants on settings</div>
+<div class="content"><div class="highlight"><pre><span class="n">JINJA2_CONSTANTS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&quot;email&quot;</span><span class="p">:</span> <span class="s">&quot;foo@bar.bz&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div></div></div>
+<div class="listingblock">
 <div class="title">Render 4xx/500 pages with jinja</div>
 <div class="content"><div class="highlight"><pre><span class="c"># yourproject/urls.py</span>
 <span class="kn">from</span> <span class="nn">django_jinja</span> <span class="kn">import</span> <span class="n">views</span>
 
+<span class="n">handler400</span> <span class="o">=</span> <span class="n">views</span><span class="o">.</span><span class="n">BadRequest</span><span class="o">.</span><span class="n">as_view</span><span class="p">()</span>
 <span class="n">handler403</span> <span class="o">=</span> <span class="n">views</span><span class="o">.</span><span class="n">PermissionDenied</span><span class="o">.</span><span class="n">as_view</span><span class="p">()</span>
 <span class="n">handler404</span> <span class="o">=</span> <span class="n">views</span><span class="o">.</span><span class="n">PageNotFound</span><span class="o">.</span><span class="n">as_view</span><span class="p">()</span>
 <span class="n">handler500</span> <span class="o">=</span> <span class="n">views</span><span class="o">.</span><span class="n">ServerError</span><span class="o">.</span><span class="n">as_view</span><span class="p">()</span>
 </pre></div></div></div>
 </div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_known_issues">Known Issues</h2>
+<div class="sectionbody">
+<div class="ulist"><ul>
+<li>
+<p>
+django-jinja does not works properly with django&#8217;s <span class="monospaced">TemplateResponse</span> class, widely
+  used by generic views. My recommendations is subclass the <span class="monospaced">TemplateResponseMixin</span> and
+  overwrite the render_to_response function.
+</p>
+</li>
+</ul></div>
 </div>
 </div>
 <div class="sect1">
@@ -335,6 +340,51 @@ library for Django (official description).</p></div>
 <div class="sect1">
 <h2 id="_changelog">Changelog</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_version_1_0_4">Version 1.0.4</h3>
+<div class="ulist"><ul>
+<li>
+<p>
+Add render_with decorator as replacement for django inclusion_tag.
+</p>
+</li>
+<li>
+<p>
+Reorder how builtin functions/filters are setted making easy overwrite them.
+</p>
+</li>
+</ul></div>
+</div>
+<div class="sect2">
+<h3 id="_version_1_0_3">Version 1.0.3</h3>
+<div class="ulist"><ul>
+<li>
+<p>
+Add timezone template filters and template global functions: localtime, tz and timezone.
+</p>
+</li>
+</ul></div>
+</div>
+<div class="sect2">
+<h3 id="_version_1_0_2">Version 1.0.2</h3>
+<div class="ulist"><ul>
+<li>
+<p>
+Fix bug with application loading with django &lt; 1.7
+</p>
+</li>
+</ul></div>
+</div>
+<div class="sect2">
+<h3 id="_version_1_0_1">Version 1.0.1</h3>
+<div class="ulist"><ul>
+<li>
+<p>
+Fix bug introduced in previous version on <span class="monospaced">easy_thumbnails</span> contrib app.
+</p>
+</li>
+</ul></div>
+</div>
 <div class="sect2">
 <h3 id="_version_1_0_0">Version 1.0.0</h3>
 <div class="ulist"><ul>
@@ -591,8 +641,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 <div id="footnotes"><hr></div>
 <div id="footer">
 <div id="footer-text">
-Version 1.0.0<br>
-Last updated 2014-05-25 02:27:54 CEST
+Version 1.0.4<br>
+Last updated 2014-08-24 20:07:56 CEST
 </div>
 </div>
 </body>
